@@ -1,6 +1,6 @@
 # Ollama local AI app
 
-[![CI Build](https://github.com/{user}/{repo}/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/{user}/{repo}/actions)
+[![CI Build](https://github.com/juancantor12/ollama-python-skeleton/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/juancantor12/ollama-python-skeleton/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
