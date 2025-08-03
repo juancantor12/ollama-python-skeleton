@@ -1,18 +1,35 @@
 """Shared utilities for the app."""
 
-import pathlib
+import os
+from pathlib import Path
+from typing import Union
+from chromadb import PersistentClient
+from chromadb.api.models.Collection import Collection
+from dotenv import load_dotenv
+from app.logging import setup_logging
+
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[2] / ".env")
 
 
 class Utils:
     """Utilities for the CV builder."""
 
-    logger = None
+    logger = setup_logging("default")
+    # Sensitive
+    API_SECRET_KEY = os.getenv("API_SECRET_KEY")
+    API_TOKEN_ALGORITHM = os.getenv("API_TOKEN_ALGORITHM")
+    API_TOKEN_EXPIRE_MINUTES = int(os.getenv("API_TOKEN_EXPIRE_MINUTES", "10"))
+    API_DB_NAME = os.getenv("API_DB_NAME", "users.db")
+
+    # Environment-specific
+    COLLECTION_NAME = os.getenv("COLLECTION_NAME", "embeddings")
+    DEFAULT_DB_FILENAME = os.getenv("DEFAULT_DB_FILENAME", "chroma.sqlite3")
 
     def __init__(self, output_folder_name):
         self.output_folder_name = output_folder_name
 
     @staticmethod
-    def get_output_path(output_folder_name: str, create: bool = False) -> str:
+    def get_output_path(output_folder_name: str, create: bool = False) -> Path:
         """
         Returns the absolute output path for a given folder name.
 
@@ -24,14 +41,14 @@ class Utils:
         str: The absolute path to the required output folder.
         """
         path = f"output/{output_folder_name}"
-        root_path = pathlib.Path(__file__).resolve().parents[2]
+        root_path = Path(__file__).resolve().parents[2]
         output_path = root_path / path
         if create:
-            pathlib.Path(output_path).mkdir(exist_ok=True)
+            Path(output_path).mkdir(exist_ok=True)
         return output_path
 
     @staticmethod
-    def get_data_path() -> str:
+    def get_data_path() -> Path:
         """
         Returns the absolute data path.
 
@@ -39,7 +56,7 @@ class Utils:
         str: the absolute path to the /data/ folder of the app
         """
         path = "data"
-        root_path = pathlib.Path(__file__).resolve().parents[2]
+        root_path = Path(__file__).resolve().parents[2]
         data_path = root_path / path
         return data_path
 
@@ -65,3 +82,28 @@ class Utils:
             print(f"Saving to output/{file_name}")
 
         return True
+
+    @staticmethod
+    def strip_extension(file_name: str) -> str:
+        """
+        Strips the extension of the name of a file and returns the filename without the extension
+
+        Args:
+        file_name (str): the name of the file with extension, may have several dots
+
+        Returns:
+        str: the file name stripped of the extension
+        """
+        cleaned = ""
+        noext = file_name
+        if "." in file_name:
+            segments = file_name.split(".")
+            noext = ".".join(segments[:-1])
+        for segment in noext.split(" "):
+            cleaned += segment.capitalize()
+        return cleaned
+
+    @staticmethod
+    def get_api_db_path() -> Path:
+        """Returns the api DB path."""
+        return Utils.get_data_path() / Utils.API_DB_NAME
